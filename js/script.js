@@ -48,6 +48,53 @@ function truncate(text, max = 200) {
     return text.length > max ? text.slice(0, max) + '…' : text;
 }
 
+// Convert common video URLs to embeddable sources (YouTube, Vimeo)
+function getEmbedUrl(url) {
+    try {
+        const u = new URL(url);
+        const host = u.hostname.toLowerCase();
+        if (host.includes('youtube.com')) {
+            // youtube.com/watch?v=ID
+            const v = u.searchParams.get('v');
+            if (v) return `https://www.youtube.com/embed/${v}`;
+            // already embed URL
+            if (u.pathname.includes('/embed/')) return url;
+        }
+        if (host.includes('youtu.be')) {
+            const id = u.pathname.slice(1);
+            if (id) return `https://www.youtube.com/embed/${id}`;
+        }
+        if (host.includes('vimeo.com')) {
+            const parts = u.pathname.split('/').filter(Boolean);
+            const id = parts.pop();
+            if (id) return `https://player.vimeo.com/video/${id}`;
+        }
+        // Fallback: if url already looks embeddable return as-is
+        if (url.includes('embed')) return url;
+    } catch (e) {
+        // ignore
+    }
+    return null;
+}
+
+// Random space facts shown on load
+const facts = [
+    'Did you know? A day on Venus is longer than a year on Venus.',
+    'Did you know? Neutron stars can spin up to 716 times per second.',
+    'Did you know? Space is not completely empty — it has a few atoms per cubic meter.',
+    'Did you know? One million Earths could fit inside the Sun.',
+    'Did you know? The footprints on the Moon will likely stay for millions of years.',
+    'Did you know? Jupiter has the shortest day of all planets — about 10 hours.',
+    'Did you know? A spoonful of a neutron star would weigh about 6 billion tons.'
+];
+
+function showRandomFact() {
+    const el = document.getElementById('fact');
+    if (!el) return;
+    const idx = Math.floor(Math.random() * facts.length);
+    el.textContent = facts[idx];
+}
+
 // Render a list of APOD items into the gallery
 function renderGallery(items) {
     gallery.innerHTML = '';
@@ -64,21 +111,37 @@ function renderGallery(items) {
         const card = document.createElement('div');
         card.className = 'gallery-item';
 
-        // Media: image or video
+        // Media: image or a video thumbnail + play overlay
         if (item.media_type === 'image') {
             const img = document.createElement('img');
             img.src = item.url;
             img.alt = item.title || 'NASA image';
             card.appendChild(img);
         } else if (item.media_type === 'video') {
-            const frame = document.createElement('iframe');
-            frame.src = item.url;
-            frame.title = item.title || 'NASA video';
-            frame.width = '100%';
-            frame.height = '200';
-            frame.frameBorder = '0';
-            frame.allowFullscreen = true;
-            card.appendChild(frame);
+            // show thumbnail if available, otherwise a placeholder
+            const thumbWrap = document.createElement('div');
+            thumbWrap.style.position = 'relative';
+
+            if (item.thumbnail_url) {
+                const t = document.createElement('img');
+                t.src = item.thumbnail_url;
+                t.alt = item.title || 'Video thumbnail';
+                t.style.height = '200px';
+                t.style.objectFit = 'cover';
+                thumbWrap.appendChild(t);
+            } else {
+                const placeholder = document.createElement('div');
+                placeholder.style.height = '200px';
+                placeholder.style.background = '#000';
+                placeholder.style.borderRadius = '4px';
+                thumbWrap.appendChild(placeholder);
+            }
+
+            const overlay = document.createElement('div');
+            overlay.className = 'play-overlay';
+            overlay.textContent = '▶ Video';
+            thumbWrap.appendChild(overlay);
+            card.appendChild(thumbWrap);
         }
 
         // Text content: date, title, explanation
@@ -138,16 +201,42 @@ async function fetchAPODRange() {
 
 // Modal DOM references
 const modal = document.getElementById('modal');
-const modalImg = modal.querySelector('.modal-image');
+const modalMedia = modal.querySelector('.modal-media');
 const modalTitle = modal.querySelector('.modal-title');
 const modalDate = modal.querySelector('.modal-date');
 const modalExplanation = modal.querySelector('.modal-explanation');
 const modalClose = modal.querySelector('.modal-close');
 
-// Open modal with APOD item data
+// Open modal with APOD item data (supports image or embedded video)
 function openModal(item) {
-    modalImg.src = item.hdurl || item.url || '';
-    modalImg.alt = item.title || 'NASA image';
+    // clear previous media
+    modalMedia.innerHTML = '';
+
+    if (item.media_type === 'image') {
+        const img = document.createElement('img');
+        img.src = item.hdurl || item.url || '';
+        img.alt = item.title || 'NASA image';
+        modalMedia.appendChild(img);
+    } else if (item.media_type === 'video') {
+        const embed = getEmbedUrl(item.url);
+        if (embed) {
+            const frame = document.createElement('iframe');
+            frame.src = embed;
+            frame.width = '100%';
+            frame.height = '500';
+            frame.frameBorder = '0';
+            frame.allowFullscreen = true;
+            modalMedia.appendChild(frame);
+        } else {
+            // fallback: clickable link
+            const a = document.createElement('a');
+            a.href = item.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = 'Open video in a new tab';
+            modalMedia.appendChild(a);
+        }
+    }
 
     modalTitle.textContent = item.title || '';
     modalDate.textContent = item.date || '';
@@ -161,6 +250,7 @@ function openModal(item) {
 function closeModal() {
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
+    modalMedia.innerHTML = '';
 }
 
 // Close button
@@ -188,3 +278,6 @@ fetchBtn.addEventListener('click', fetchAPODRange);
 
 // Optional: fetch immediately for the default date range on load
 // fetchAPODRange();
+
+// Show a random space fact on load
+showRandomFact();
