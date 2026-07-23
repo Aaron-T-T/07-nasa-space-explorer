@@ -7,9 +7,15 @@
 
 /* Base page styles */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
   background-color: #f1f1f1;
   padding: 20px;
+}
+
+:root {
+  --nasa-blue: #0b3d91;
+  --nasa-red: #ce1126;
+  --nasa-dark: #0a2a66;
 }
 
 /* Centered container */
@@ -26,12 +32,15 @@ body {
   padding-top: 20px;
   padding-bottom: 20px;
   margin-bottom: 20px;
+  background: linear-gradient(90deg, var(--nasa-blue), var(--nasa-dark));
+  border-radius: 8px;
+  color: white;
 }
 
 h1 {
-  font-family: Verdana, sans-serif;
-  font-weight: bold;
-  color: #212121;
+  font-family: 'Helvetica Neue', Verdana, sans-serif;
+  font-weight: 700;
+  color: white;
 }
 
 /* Logo */
@@ -66,12 +75,18 @@ button {
 
 /* Button specific */
 button {
-  background-color: #d3d3d3;
-  color: black;
+  background-color: var(--nasa-blue);
+  color: #fff;
   cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(11,61,145,0.15);
 }
 button:hover {
-  background-color: #bfbfbf;
+  background-color: var(--nasa-red);
+}
+
+.filters input[type="date"] {
+  border: 1px solid #cfdbe8;
 }
 
 /* Stack horizontally on wider screens */
@@ -122,6 +137,26 @@ button:hover {
   height: 200px;
   object-fit: cover;
   border-radius: 4px;
+}
+
+/* Hover zoom effect */
+.gallery-item img {
+  transition: transform 300ms ease;
+}
+.gallery-item:hover img {
+  transform: scale(1.05);
+}
+
+/* Play overlay for videos */
+.play-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 700;
 }
 
 .gallery-item p {
@@ -187,6 +222,26 @@ button:hover {
   height: auto;
   border-radius: 4px;
   margin-bottom: 12px;
+}
+
+/* Modal media container (for images or embedded video) */
+.modal-media img,
+.modal-media iframe {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+/* Random fact */
+.fact {
+  background: linear-gradient(90deg, rgba(11,61,145,0.06), rgba(10,42,102,0.04));
+  border-left: 4px solid var(--nasa-blue);
+  padding: 12px 16px;
+  margin: 0 20px 12px 20px;
+  border-radius: 6px;
+  color: var(--nasa-dark);
+  font-size: 15px;
 }
 .modal-title {
   margin-top: 6px;
