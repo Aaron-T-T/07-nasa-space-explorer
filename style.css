@@ -142,3 +142,64 @@ button:hover {
   font-size: 48px;
   margin-bottom: 20px;
 }
+
+/* Modal styles */
+.modal.hidden { display: none; }
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+.modal-content {
+  position: relative;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  z-index: 1001;
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #f2f2f2;
+  border: 0;
+  border-radius: 6px;
+  font-size: 20px;
+  line-height: 1;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.modal-image {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+.modal-title {
+  margin-top: 6px;
+  font-size: 20px;
+  color: #111;
+}
+.modal-date {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.modal-explanation {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #333;
+}
